@@ -9,13 +9,15 @@
 <template name="home">
 <p>This is a demo app. Click <a href="new">here</a> to create a new document.</p>
 <p>After submitting the document you will be redirected to its permanent link</p>
-<p>This demo was built by <a href="http://github.com/fazo96">Enrico Fasoli (fazo96)</a> in 45 minutes.</p>
+<p>There are <b>{{ndocs}}</b> documents in the database</p>
+<p>This demo was built by <a href="http://github.com/fazo96">Enrico Fasoli (fazo96)</a> in 45 minutes. It's open source, you can find the code <a href="http://github.com/fazo96/markcloud">here</a></p>
 </template>
 
 <template name="new">
   <p>Write your document in <a href="https://help.github.com/articles/github-flavored-markdown/">GitHub Flavored Markdown</a> then submit it with the button. You will be redirected to its permanent link</p>
-  <textarea id="editor" class="form-control"></textarea>
-  <button id="new-btn" class="btn btn-primary">submit</button>
+  <textarea id="editor" class="form-control" rows="10" autofocus></textarea>
+  <button id="new-btn" class="btn btn-primary">
+    <i class="fa fa-upload"></i> Upload</button>
 </template>
 
 <template name="docLayout">
@@ -25,5 +27,11 @@
 <template name="doc">
   {{#markdown}}{{text}}{{/markdown}}
   <hr>
-  <div align="center">Powered by <a href="/">MarkCloud</a></div>
+  <div class="text-center">Powered by <a href="/">MarkCloud</a></div>
+</template>
+
+<template name="loading">
+  <div class="text-center">
+    <i class="fa fa-cog fa-spin fa-3x"></i>
+  </div>
 </template>
