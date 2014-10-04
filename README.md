@@ -8,7 +8,7 @@ MarkCloud is [hosted online](http://markcloud.meteor.com).
 ### Development
 
 Clone the repository, make sure you installed [Meteor](http://meteor.com) then
-run `meteor`. Yep, that's it.
+run `meteor` in the project folder. Yep, that's it.
 
 ## License
 

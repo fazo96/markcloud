@@ -4,11 +4,8 @@
 # but you can also edit it by hand.
 
 meteor-platform
-autopublish
-insecure
 iron:router
 mizzao:bootstrap-3
 coffeescript
 less
 perak:markdown
-
