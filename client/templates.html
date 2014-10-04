@@ -3,19 +3,25 @@
 <div class="container">
   <h1>MarkCloud</h1>
   <hr>
+  {{> notifications}}
   {{> yield}}
 </div>
 </template>
 
 <template name="home">
+{{#if currentUser}}<p>Logged in as <b>{{mail}}</b></p>{{/if}}
 <p>This is a demo app. Click <a href="new">here</a> to create a new document.</p>
 <p>After submitting the document you will be redirected to its permanent link</p>
 <p>There are <b>{{ndocs}}</b> documents in the database</p>
-<p>This demo was built by <a href="http://github.com/fazo96">Enrico Fasoli (fazo96)</a> in 45 minutes. It's open source, you can find the code <a href="http://github.com/fazo96/markcloud">here</a></p>
+<p>This demo was built by <a href="http://github.com/fazo96">Enrico
+  Fasoli (fazo96)</a> in 45 minutes, it's now evolving to a full app.</p>
+<p>It's open source, you can find the code
+  <a href="http://github.com/fazo96/markcloud">here</a></p>
 </template>
 
 <template name="new">
   <p>Write your document in <a href="https://help.github.com/articles/github-flavored-markdown/">GitHub Flavored Markdown</a> then submit it with the button. You will be redirected to its permanent link</p>
+  <input type="text" id="title" class="form-control" placeholder="Title">
   <textarea id="editor" class="form-control" rows="10" autofocus></textarea>
   <button id="new-btn" class="btn btn-primary">
     <i class="fa fa-upload"></i> Upload</button>
@@ -48,5 +54,42 @@
 <template name="spinner">
 <div id="spinner">
   <i class="fa fa-2x fa-cog fa-spin"></i>
+</div>
+</template>
+
+<template name="404">
+<div class="text-center">
+  <h1>404</h1>
+  <p>This page does not exist.</p>
+</div>
+</template>
+
+<template name="notifications">
+{{#if notification}}
+<div class="center-block text-center">
+  <div class="alert alert-{{notification.type}} error">
+    <p align="center">{{notification.msg}}</p>
+    <button type="button" class="close close-error">&times;</button>
+  </div>
+</div>
+{{/if}}
+</template>
+
+<template name="signup">
+<div id="signup-container">
+  <h2>Sign Up</h2>
+  <input type="text" class="form-control" id="mail" placeholder="E-Mail Address">
+  <input type="password" class="form-control" placeholder="Password" id="pw">
+  <input type="password" class="form-control" placeholder="Repeat Password" id="rpw">
+  <button class="btn btn-primary" id="signup">Sign Up</button>
+</div>
+</template>
+
+<template name="signin">
+<div id="signin-container">
+  <h2>Sign In</h2>
+  <input type="text" class="form-control" id="mail" placeholder="E-Mail Address">
+  <input type="password" class="form-control" placeholder="Password" id="pw">
+  <button class="btn btn-primary" id="signin">Sign In</button>
 </div>
 </template>
