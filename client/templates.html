@@ -7,14 +7,23 @@
 </template>
 
 <template name="home">
-test
+<p>This is a demo app. Click <a href="new">here</a> to create a new document.</p>
+<p>After submitting the document you will be redirected to its permanent link</p>
+<p>This demo was built by <a href="http://github.com/fazo96">Enrico Fasoli (fazo96)</a> in 45 minutes.</p>
 </template>
 
 <template name="new">
+  <p>Write your document in <a href="https://help.github.com/articles/github-flavored-markdown/">GitHub Flavored Markdown</a> then submit it with the button. You will be redirected to its permanent link</p>
   <textarea id="editor" class="form-control"></textarea>
   <button id="new-btn" class="btn btn-primary">submit</button>
 </template>
 
+<template name="docLayout">
+<div class="container">{{> yield}}</div>
+</template>
+
 <template name="doc">
-  {{#markdown}} {{text}} {{/markdown}}
+  {{#markdown}}{{text}}{{/markdown}}
+  <hr>
+  <div align="center">Powered by <a href="/">MarkCloud</a></div>
 </template>
