@@ -1,0 +1,20 @@
+<template name="layout">
+<div class="container">
+  <h1>MarkCloud</h1>
+  <hr>
+  {{> yield}}
+</div>
+</template>
+
+<template name="home">
+test
+</template>
+
+<template name="new">
+  <textarea id="editor" class="form-control"></textarea>
+  <button id="new-btn" class="btn btn-primary">submit</button>
+</template>
+
+<template name="doc">
+  {{#markdown}} {{text}} {{/markdown}}
+</template>
