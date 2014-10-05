@@ -10,6 +10,10 @@ MarkCloud is [hosted online](http://markcloud.meteor.com).
 Clone the repository, make sure you installed [Meteor](http://meteor.com) then
 run `meteor` in the project folder. Yep, that's it.
 
+If you want to set up a server, make sure to configure the `MAIL_URL`
+and `ROOT_URL` environment variables as explained in the
+[Meteor Docs](http://docs.meteor.com).
+
 ## License
 
 The MIT License (MIT)
