@@ -16,7 +16,7 @@
 </template>
 
 <template name="home">
-{{#if currentUser}}<p>Logged in as <b>{{mail}}</b></p>{{/if}}
+{{#if currentUser}}<p>Logged in as <b>{{username}} ({{mail}})</b></p>{{/if}}
 <p>This is a demo app. Click <a href="new">here</a> to create a new document.</p>
 <p>After submitting the document you will be redirected to its permanent link</p>
 <p>There are <b>{{ndocs}}</b> documents in the database</p>
@@ -29,10 +29,11 @@
 <template name="new">
   <p>Write your document in <a href="https://help.github.com/articles/github-flavored-markdown/">GitHub Flavored Markdown</a> then submit it with the button. You will be redirected to its permanent link</p>
   <input type="text" id="title" class="form-control" placeholder="Title" value="{{title}}">
-  <input type="checkbox" id="show-title" checked> Show title in document
+  <input type="checkbox" id="show-title" {{showTitleChecked}}>
+  Show title in document
   <textarea id="editor" class="form-control" rows="10" placeholder="Write your markdown :)" autofocus>{{text}}</textarea>
   <button id="upload" class="btn btn-primary">
-    <i class="fa fa-upload"></i> {{#if _id}}Update{{else}}Upload{{/if}}</button>
+    <i class="fa fa-upload"></i> {{#if _id}}Update{{else}}Create{{/if}}</button>
 </template>
 
 <template name="docLayout">
@@ -67,6 +68,10 @@
     {{/unless}}
     {{#if owned}}
       <p>This document is <b>yours</b>.</p>
+    {{else}}
+      {{#unless owner}}
+      <p>This anonymous document will <b>expire {{expirationDays}}</b></p>
+      {{/unless}}
     {{/if}}
     {{#if valid}}
     <div class="btn-group" id="tools">
@@ -124,7 +129,9 @@
 <template name="signup">
 <div id="signup-container">
   <h2>Sign Up<a href="/"><i class="fa fa-home pull-right"></i></a></h2>
+  <p>You will be able to log in using your email or your username.</p>
   <input type="text" class="form-control" id="mail" placeholder="E-Mail Address">
+  <input type="text" class="form-control" id="name" placeholder="Username">
   <input type="password" class="form-control" placeholder="Password" id="pw">
   <input type="password" class="form-control" placeholder="Repeat Password" id="rpw">
   <button class="btn btn-primary" id="signup">Sign Up</button>
@@ -136,7 +143,7 @@
 <template name="signin">
 <div id="signin-container">
   <h2>Sign In<a href="/"><i class="fa fa-home pull-right"></i></a></h2>
-  <input type="text" class="form-control" id="mail" placeholder="E-Mail Address">
+  <input type="text" class="form-control" id="mail" placeholder="E-Mail Address or Username">
   <input type="password" class="form-control" placeholder="Password" id="pw">
   <button class="btn btn-primary" id="signin">Sign In</button>
   <hr>
@@ -145,7 +152,9 @@
 </template>
 
 <template name="list">
+<ul class="list-group">
 {{#each documents}}
-<a href="/d/{{_id}}">{{title}}</a>
+  <a class="list-group-item" href="/d/{{_id}}">{{title}}</a>
 {{/each}}
+</ul>
 </template>

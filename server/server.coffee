@@ -1,5 +1,18 @@
 docs = new Meteor.Collection 'docs'
 
+cleanDocuments = ->
+  docs.remove {
+    owner: {$exists: no},
+    dateCreated: $lte: moment().subtract(7, 'days').unix()
+  }, (e,n) ->
+    if e then console.log e
+    console.log n+' anonymous documents \
+    not updated by more than 7 days have been removed'
+
+Meteor.startup ->
+  cleanDocuments()
+  Meteor.setInterval cleanDocuments, 3600000
+
 validatedUser = (uid) ->
   return no unless Meteor.users.findOne uid
   u = Meteor.users.findOne uid
@@ -18,15 +31,18 @@ docs.allow
   insert: (uid,doc) ->
     if doc.text and doc.title
       doc.dateCreated = moment().unix()
+      doc.showTitle ?= yes
       if doc.owner and !uid then return no
       if uid then doc.owner = uid
-      console.log doc.dateCreated
       return yes
     return no
 docs.allow
   # Owners can update and remove their documents
-  update: (uid,doc) -> doc.owner is uid
+  update: (uid,doc) ->
+    return no unless uid is doc.owner
+    docs.update doc._id, $set: lastModified: moment().unix()
+    return yes
   remove: (uid,doc) -> doc.owner is uid
-  fetch: ['owner'] # Only fetch the owner field from the database documents
+  fetch: ['owner']
 
 # Save account creation date

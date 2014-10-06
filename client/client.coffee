@@ -71,6 +71,7 @@ Template.notifications.events
 Template.layout.showSpinner = ->
   Meteor.status().connected is no or Router.current().ready() is no
 Template.home.ndocs = -> docs.find().count()
+Template.new.showTitleChecked = -> return "checked" unless @showTitle is no
 Template.new.events
   'click #upload': (e,t) ->
     if t.find('#title').value is ''
@@ -90,31 +91,22 @@ Template.new.events
       title: t.find('#title').value
       text: t.find('#editor').value
       showTitle: $('#show-title').is(':checked')
-      dateCreated: moment().unix()
     }, (err,id) ->
       if err then errCallback err
       else notify type:'success', msg:'Document created successfully'
       if id then Router.go 'doc', _id: id
-    ###docs.upsert @_id, $set: {
-      title: t.find('#title').value
-      text: t.find('#editor').value
-      showTitle: $('#show-title').is(':checked')
-      dateCreated: moment().unix()
-    }, (err,resp) ->
-      if err then errCallback err
-      else if @_id
-        notify type:'success', msg:'Document updated'
-        Router.go 'doc', _id: @_id
-      else
-        notify type:'success', msg:'Document created successfully'
-        Router.go 'doc', _id: resp.insertedId###
 
-Template.list.documents = -> docs.find owner: @userId
+Template.list.documents = ->
+  console.log docs.find(owner: @userId).fetch()
+  docs.find {owner: @userId}, sort: dateCreated: -1
 
 Template.doc.source = -> Router.current().route.name is 'src'
 Template.doc.rows = -> ""+@text.split('\n').length
 Template.doc.valid = -> @text?
 Template.doc.owned = -> Meteor.user()._id is @owner
+Template.doc.expirationDays = ->
+  if @owner then return 'never'
+  else return moment.unix(@dateCreated).add(7,'days').fromNow()
 Template.doc.events
   'click #edit-doc': -> Router.go 'edit', _id: @_id
   'click #del-doc': ->
@@ -130,7 +122,7 @@ Template.doc.events
 Template.signin.events
   'click #signin': (e,t) ->
     if not t.find('#mail').value
-      return notify msg: 'please enter an email'
+      return notify msg: 'please enter your email or username'
     else if not t.find('#pw').value
       return notify msg: "Please enter a password"
     else
@@ -141,14 +133,16 @@ Template.signin.events
 Template.signup.events
   'click #signup': (e,t) ->
     if not t.find('#mail').value
-      return notify msg: 'please enter an email'
+      return notify msg: 'please enter your email'
+    if not t.find('#name').value
+      return notify msg: 'please enter your user name'
     else if not t.find('#pw').value
       return notify msg: "Please enter a password"
     else if t.find('#pw').value isnt t.find('#rpw').value
       return notify msg: "The passwords don't match"
     else # Sending actual registration request
-      console.log t.find('#mail').value
       Accounts.createUser {
+        username: t.find('#name').value
         email: t.find('#mail').value
         password: t.find('#pw').value
       }, (err) -> if err then errCallback err
