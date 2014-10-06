@@ -9,14 +9,20 @@ Meteor.publish 'doc', (id) -> docs.find {_id: id}, limit: 1
 Meteor.publish 'docs', -> docs.find {}, fields: text: 0
 Meteor.publish 'user', ->
   if @userId
-    docs.find {_id:@userId}, fields: {dateCreated: 1}
+    Meteor.users.find {_id: @userId}, fields: {dateCreated: 1}
   else @ready()
 
 docs.allow
   insert: (uid,doc) ->
-    return no unless doc.text and doc.title
-    if uid then doc.owner = uid; return yes
-    else if doc.owner then return no
+    if doc.text and doc.title
+      doc.dateCreated = moment().unix()
+      if doc.owner and !uid then return no
+      if uid then doc.owner = uid
+      console.log 'ok'
+      return yes
+    console.log 'nope'
+    return no
+docs.allow
   # Owners can update and remove their documents
   update: (uid,doc) -> doc.owner is uid
   remove: (uid,doc) -> doc.owner is uid

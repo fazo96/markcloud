@@ -1,3 +1,10 @@
+<head>
+  <title>MarkCloud</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
 <template name="layout">
 {{> yield region="outside"}}
 <div class="container">
@@ -22,7 +29,8 @@
 <template name="new">
   <p>Write your document in <a href="https://help.github.com/articles/github-flavored-markdown/">GitHub Flavored Markdown</a> then submit it with the button. You will be redirected to its permanent link</p>
   <input type="text" id="title" class="form-control" placeholder="Title">
-  <textarea id="editor" class="form-control" rows="10" autofocus></textarea>
+  <input type="checkbox" id="show-title" checked> Show title in document
+  <textarea id="editor" class="form-control" rows="10" placeholder="Write your markdown :)" autofocus></textarea>
   <button id="new-btn" class="btn btn-primary">
     <i class="fa fa-upload"></i> Upload</button>
 </template>
@@ -33,6 +41,7 @@
 </template>
 
 <template name="doc">
+  {{#if showTitle}}<h1>{{title}}</h1><hr>{{/if}}
   {{#if text}}
     {{#markdown}}{{text}}{{/markdown}}
   {{else}}
@@ -42,7 +51,24 @@
   </div>
   {{/if}}
   <hr>
-  <div class="text-center">Powered by <a href="/">MarkCloud</a></div>
+  <div class="text-center">
+    {{#unless currentUser}}
+      <a href="/login">Log in</a> to edit and delete your documents<br>
+    {{/unless}}
+    <div class="btn-group" id="tools">
+      {{#if currentUser}}
+      <button id="edit-doc" class="btn btn-primary" {{canEdit}}>
+        Edit</button>
+      {{/if}}
+      <button id="clone-doc" class="btn btn-success">
+        Clone</button>
+      {{#if currentUser}}
+      <button id="del-doc" class="btn btn-danger">
+        Delete</button>
+      {{/if}}
+    </div>
+    <br>Powered by <a href="/">MarkCloud</a>
+  </div>
 </template>
 
 <template name="loading">
@@ -77,19 +103,23 @@
 
 <template name="signup">
 <div id="signup-container">
-  <h2>Sign Up</h2>
+  <h2>Sign Up<a href="/"><i class="fa fa-home pull-right"></i></a></h2>
   <input type="text" class="form-control" id="mail" placeholder="E-Mail Address">
   <input type="password" class="form-control" placeholder="Password" id="pw">
   <input type="password" class="form-control" placeholder="Repeat Password" id="rpw">
   <button class="btn btn-primary" id="signup">Sign Up</button>
+  <hr>
+  <div class="text-center">Already have an account? <a href="/login">Sign in!</a></div>
 </div>
 </template>
 
 <template name="signin">
 <div id="signin-container">
-  <h2>Sign In</h2>
+  <h2>Sign In<a href="/"><i class="fa fa-home pull-right"></i></a></h2>
   <input type="text" class="form-control" id="mail" placeholder="E-Mail Address">
   <input type="password" class="form-control" placeholder="Password" id="pw">
   <button class="btn btn-primary" id="signin">Sign In</button>
+  <hr>
+  <div class="text-center">Need an account? <a href="/signup">Sign Up!</a></div>
 </div>
 </template>

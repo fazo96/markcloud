@@ -40,6 +40,7 @@ share.notify = notify = (opt) ->
     opt.type ?= "danger"
     notification.set opt
 errCallback = (err) ->
+  return unless err
   if err.reason then notify msg: err.reason else notify msg: err
 Template.notifications.notification = -> notification.get()
 Template.notifications.events
@@ -50,13 +51,20 @@ Template.layout.showSpinner = ->
 Template.home.ndocs = -> docs.find().count()
 Template.new.events
   'click #new-btn': (e,t) ->
-    id = docs.insert
+    if t.find('#title').value is ''
+      return notify msg: 'please insert a title'
+    if t.find('#editor').value is ''
+      return notify msg: "can't create empty document"
+    docs.insert {
       title: t.find('#title').value
       text: t.find('#editor').value
+      showTitle: $('#show-title').is(':checked')
       dateCreated: moment().unix()
-    if id
-      Router.go 'doc', _id: id
-    else notify msg: 'document creation failed'
+    }, (err,id) ->
+      errCallback err
+      if id then Router.go 'doc', _id: id
+
+Template.doc.canEdit = -> "disabled" unless Meteor.user()._id is @owner
 
 Template.signup.events
   'click #signup': (e,t) ->
