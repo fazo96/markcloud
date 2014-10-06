@@ -43,7 +43,11 @@
 <template name="doc">
   {{#if showTitle}}<h1>{{title}}</h1><hr>{{/if}}
   {{#if text}}
-    {{#markdown}}{{text}}{{/markdown}}
+    {{#if source}}
+    <textarea id="src" class="form-control" rows="{{rows}}" readonly>{{text}}</textarea>
+    {{else}}
+    <div id="doc">{{#markdown}}{{text}}{{/markdown}}</div>
+    {{/if}}
   {{else}}
   <div class="text-center">
     <h1>Sorry</h1>
@@ -58,13 +62,18 @@
     <div class="btn-group" id="tools">
       {{#if currentUser}}
       <button id="edit-doc" class="btn btn-primary" {{canEdit}}>
-        Edit</button>
+        <i class="fa fa-edit"></i> Edit</button>
       {{/if}}
-      <button id="clone-doc" class="btn btn-success">
-        Clone</button>
+      {{#if source}}
+      <button id="src-doc" class="btn btn-success">
+        <i class="fa fa-book"></i> View Document</button>
+      {{else}}
+      <button id="src-doc" class="btn btn-success">
+        <i class="fa fa-code"></i> View Source</button>
+      {{/if}}
       {{#if currentUser}}
       <button id="del-doc" class="btn btn-danger">
-        Delete</button>
+        <i class="fa fa-trash"></i> Delete</button>
       {{/if}}
     </div>
     <br>Powered by <a href="/">MarkCloud</a>

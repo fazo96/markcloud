@@ -6,6 +6,15 @@ Router.configure
   layoutTemplate: 'layout'
   loadingTemplate: 'loading'
 
+docController = RouteController.extend
+  template: 'doc'
+  layoutTemplate: 'docLayout'
+  waitOn: -> Meteor.subscribe 'doc', @params._id
+  data: -> docs.findOne @params._id
+  action: ->
+    if @ready() then @render()
+    else @render 'loading'
+
 Router.map ->
   @route 'home',
     path: '/'
@@ -16,12 +25,10 @@ Router.map ->
       else @render()
   @route 'doc',
     path: '/d/:_id'
-    layoutTemplate: 'docLayout'
-    waitOn: -> @docHandle = Meteor.subscribe 'doc', @params._id
-    data: -> docs.findOne @params._id
-    action: ->
-      if @ready() then @render()
-      else @render 'loading'
+    controller: docController
+  @route 'src',
+    path:'/src/:_id'
+    controller: docController
   @route 'verify',
     path: '/verify/:token'
     template: 'loading'
@@ -64,7 +71,14 @@ Template.new.events
       errCallback err
       if id then Router.go 'doc', _id: id
 
+Template.doc.source = -> Router.current().route.name is 'src'
+Template.doc.rows = -> ""+@text.split('\n').length
 Template.doc.canEdit = -> "disabled" unless Meteor.user()._id is @owner
+Template.doc.events
+  'click #src-doc': ->
+    if Router.current().route.name is 'src'
+      Router.go 'doc', _id: @_id
+    else Router.go 'src', _id: @_id
 
 Template.signup.events
   'click #signup': (e,t) ->
