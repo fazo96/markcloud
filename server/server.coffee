@@ -22,10 +22,8 @@ Meteor.publish 'doc', (id) -> docs.find {_id: id}, limit: 1
 Meteor.publish 'docs', (userId) ->
   if userId? then docs.find {owner: userId}, fields: text: 0
   else docs.find {}, fields: text: 0
-Meteor.publish 'user', ->
-  if @userId
-    Meteor.users.find {_id: @userId}, fields: {dateCreated: 1}
-  else @ready()
+Meteor.publish 'user', (id) ->
+  Meteor.users.find {_id: id}, fields: {username: 1}
 
 docs.allow
   insert: (uid,doc) ->
@@ -45,4 +43,10 @@ docs.allow
   remove: (uid,doc) -> doc.owner is uid
   fetch: ['owner']
 
-# Save account creation date
+Meteor.methods
+  'deleteMe': ->
+    if @userId
+      Meteor.users.remove @userId
+      docs.remove owner: @userId
+  'sendVerificationEmail': ->
+    if @userId then Accounts.sendVerificationEmail @userId

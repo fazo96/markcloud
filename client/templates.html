@@ -8,7 +8,19 @@
 <template name="layout">
 {{> yield region="outside"}}
 <div class="container">
-  <h1>MarkCloud</h1>
+  <h1>MarkCloud
+    {{#if currentUser}}
+    <a class="pull-right" href="/u">
+      <small><i class="fa fa-chevron-right"></i></small>
+    </a>
+    {{else}}
+    {{#if notHome}}
+    <a class="pull-right" href="/">
+      <small><i class="fa fa-home"></i></small>
+    </a>
+    {{/if}}
+    {{/if}}
+  </h1>
   <hr>
   {{> notifications}}
   {{> yield}}
@@ -16,14 +28,41 @@
 </template>
 
 <template name="home">
-{{#if currentUser}}<p>Logged in as <b>{{username}} ({{mail}})</b></p>{{/if}}
-<p>This is a demo app. Click <a href="new">here</a> to create a new document.</p>
-<p>After submitting the document you will be redirected to its permanent link</p>
-<p>There are <b>{{ndocs}}</b> documents in the database</p>
-<p>This demo was built by <a href="http://github.com/fazo96">Enrico
-  Fasoli (fazo96)</a> in 45 minutes, it's now evolving to a full app.</p>
-<p>It's open source, you can find the code
-  <a href="http://github.com/fazo96/markcloud">here</a></p>
+{{#markdown}}
+### Share your markdown easily
+
+Markcloud is a simple application that lets you share your markdown documents
+to the world. Just paste your markdown and get a _permanent link_ that lets you
+and everyone else view the result in a **modern responsive web page**.
+
+### Free as in Free Software
+
+No ads. [Open Source](http://github.com/fazo96/markcloud).
+
+Made by [some guy in the internet](http://github.com/fazo96) that you probably should not trust, but hey:
+
+### No Account needed
+
+You can create a document _right now_. It will expire in 7 days.
+This home page is written in markdown too!
+{{/markdown}}
+<div class="text-center"><a class="btn btn-success" id="new" href="/new">
+  <i class="fa fa-file-text"></i> New Document</a></div>
+{{#markdown}}
+### But with an account...
+
+- Your documents **never expire!**
+- You can **edit** and **delete** your documents
+- You can **view** and **share** a list of all your documents
+
+You will be able to delete your account and all your data whenever you want.
+{{/markdown}}
+<div class="text-center" id="btns">
+  <a class="btn btn-primary" href="/signup">
+    <i class="fa fa-user"></i> Sign Up</a>
+  <a class="btn btn-success" href="/login">
+    <i class="fa fa-sign-in"></i> Log In</a>
+</div>
 </template>
 
 <template name="new">
@@ -66,32 +105,32 @@
     {{#unless currentUser}}
       <p><a href="/login">Log in</a> to edit and delete your documents<br></p>
     {{/unless}}
-    {{#if owned}}
-      <p>This document is <b>yours</b>.</p>
-    {{else}}
-      {{#unless owner}}
-      <p>This anonymous document will <b>expire {{expirationDays}}</b></p>
-      {{/unless}}
-    {{/if}}
     {{#if valid}}
-    <div class="btn-group" id="tools">
-      {{#if currentUser}}{{#if owned}}
-      <button id="edit-doc" class="btn btn-primary">
-        <i class="fa fa-edit"></i> Edit</button>
-      {{/if}}{{/if}}
-      {{#if source}}
-      <button id="src-doc" class="btn btn-success">
-        <i class="fa fa-book"></i> View Document</button>
+      {{#if owned}}
+        <p>This document is <a href="/u">yours</a>.</p>
       {{else}}
-      <button id="src-doc" class="btn btn-success">
-        <i class="fa fa-code"></i> View Source</button>
+        {{#unless owner}}
+        <p>This anonymous document will <b>expire {{expirationDays}}</b></p>
+        {{/unless}}
       {{/if}}
-      {{#if currentUser}}{{#if owned}}
-      <button id="del-doc" class="btn btn-danger">
-        <i class="fa fa-trash"></i> Delete</button>
-      {{/if}}{{/if}}
-    </div>
-    <br>
+      <div class="btn-group" id="tools">
+        {{#if currentUser}}{{#if owned}}
+        <button id="edit-doc" class="btn btn-primary">
+          <i class="fa fa-edit"></i> Edit</button>
+        {{/if}}{{/if}}
+        {{#if source}}
+        <button id="src-doc" class="btn btn-success">
+          <i class="fa fa-book"></i> View Document</button>
+        {{else}}
+        <button id="src-doc" class="btn btn-success">
+          <i class="fa fa-code"></i> View Source</button>
+        {{/if}}
+        {{#if currentUser}}{{#if owned}}
+        <button id="del-doc" class="btn btn-danger">
+          <i class="fa fa-trash"></i> Delete</button>
+        {{/if}}{{/if}}
+      </div>
+      <br>
     {{/if}}Powered by <a href="/">MarkCloud</a>
   </div>
 </template>
@@ -128,7 +167,7 @@
 
 <template name="signup">
 <div id="signup-container">
-  <h2>Sign Up<a href="/"><i class="fa fa-home pull-right"></i></a></h2>
+  <h2>Sign Up</h2>
   <p>You will be able to log in using your email or your username.</p>
   <input type="text" class="form-control" id="mail" placeholder="E-Mail Address">
   <input type="text" class="form-control" id="name" placeholder="Username">
@@ -142,7 +181,7 @@
 
 <template name="signin">
 <div id="signin-container">
-  <h2>Sign In<a href="/"><i class="fa fa-home pull-right"></i></a></h2>
+  <h2>Sign In</h2>
   <input type="text" class="form-control" id="mail" placeholder="E-Mail Address or Username">
   <input type="password" class="form-control" placeholder="Password" id="pw">
   <button class="btn btn-primary" id="signin">Sign In</button>
@@ -151,10 +190,48 @@
 </div>
 </template>
 
-<template name="list">
-<ul class="list-group">
-{{#each documents}}
-  <a class="list-group-item" href="/d/{{_id}}">{{title}}</a>
-{{/each}}
-</ul>
+<template name="profile">
+{{#if isMe}}
+<div class="text-center">
+  <p>Hello {{name}} ({{mail}}). This is your profile.</p>
+</div>
+{{/if}}
+{{#if noDocs}}
+  <div class="text-center">
+  {{#if isMe}}
+    <p>You don't have any documents yet.</p>
+  {{else}}
+    <p>This user does not have any documents.</p>
+  {{/if}}
+  </div>
+{{/if}}
+{{#if isMe}}
+  <div class="text-center" id="profile-tools">
+    <a class="btn btn-primary" id="logout">
+      <i class="fa fa-sign-out"></i> Logout</a>
+    <a class="btn btn-success" href="/new">
+      <i class="fa fa-file-text"></i> New Document</a>
+    <a class="btn btn-danger" href="/delete">
+      <i class="fa fa-exclamation-circle"></i> Delete Account</a>
+  </div>
+{{/if}}
+{{#unless noDocs}}
+  <ul class="list-group">
+    {{#each documents}}
+      <a class="list-group-item" href="/d/{{_id}}">{{title}}</a>
+    {{/each}}
+  </ul>
+{{/unless}}
+</template>
+
+<template name="delete">
+<p>If you want to delete your account enter your User Id ({{currentUser._id}})</p>
+<input type="text" class="form-control" id="name" placeholder="enter your User Id.">
+<button class="btn btn-danger" id="del-account">
+  <i class="fa fa-exclamation-circle"></i> Confirm</button>
+</template>
+
+<template name="verify">
+<p>If you didn't receive anything at <b>{{mail}}</b> address press the button below.</p>
+<button id="sendmail" class="btn btn-primary">Resend</button>
 </template>

@@ -1,5 +1,5 @@
 docs = new Meteor.Collection 'docs'
-Meteor.subscribe 'user'
+
 UI.registerHelper 'mail', -> Meteor.user().emails[0].address
 
 Router.configure
@@ -14,6 +14,11 @@ docController = RouteController.extend
   action: ->
     if @ready() then @render()
     else @render 'loading'
+
+loggedOutController = RouteController.extend
+  onBeforeAction: -> if Meteor.user() then Router.go 'profile'
+loggedInController = RouteController.extend
+  action: -> if !Meteor.user() then @render '404' else @render()
 
 Router.map ->
   @route 'home',
@@ -30,29 +35,36 @@ Router.map ->
     path:'/src/:_id'
     controller: docController
   @route 'verify',
-    path: '/verify/:token'
-    template: 'loading'
+    path: '/verify/:token?'
     onBeforeAction: ->
       Accounts.verifyEmail @params.token, (err) ->
         if err then errCallback err else Router.go 'home'
   @route 'edit',
     path: '/edit/:_id'
     template: 'new'
+    controller: loggedInController
     waitOn: -> Meteor.subscribe 'doc', @params._id
     data: -> docs.findOne @params._id
-  @route 'list',
-    path: '/list/:user?'
-    waitOn: -> Meteor.subscribe 'docs', @params.user
+  @route 'profile',
+    path: '/u/:user?'
+    waitOn: ->
+      [Meteor.subscribe('docs', @params.user),
+      Meteor.subscribe('user',@params.user)]
     data: -> userId: @params.user
     onBeforeAction: ->
       if Meteor.user() and !@params.user
-        Router.go 'list', user: Meteor.user()._id
+        Router.go 'profile', user: Meteor.user()._id
     action: ->
       if !@params.user then @render '404'
       else @render()
+  @route 'delete',
+    controller: loggedInController
   @route 'new'
-  @route 'signup'
-  @route 'signin', path: 'login'
+  @route 'signup',
+    controller: loggedOutController
+  @route 'signin',
+    path: 'login'
+    controller: loggedOutController
   @route '404', path: '*'
 
 notification = new ReactiveVar()
@@ -68,6 +80,7 @@ Template.notifications.notification = -> notification.get()
 Template.notifications.events
   'click .close': -> notify()
 
+Template.layout.notHome = -> Router.current().route.name isnt 'home'
 Template.layout.showSpinner = ->
   Meteor.status().connected is no or Router.current().ready() is no
 Template.home.ndocs = -> docs.find().count()
@@ -96,9 +109,19 @@ Template.new.events
       else notify type:'success', msg:'Document created successfully'
       if id then Router.go 'doc', _id: id
 
-Template.list.documents = ->
-  console.log docs.find(owner: @userId).fetch()
+Template.profile.name = -> Meteor.user().username
+Template.profile.isMe = ->
+  Meteor.user() and Meteor.user()._id is @userId
+Template.profile.noDocs = -> docs.find(owner: @userId).count() is 0
+Template.profile.documents = ->
   docs.find {owner: @userId}, sort: dateCreated: -1
+Template.profile.events
+  'click #logout': -> Meteor.logout(); Router.go 'home'
+
+Template.delete.events
+  'click #del-account': (e,t) ->
+    if t.find('#name').value is Meteor.user()._id
+      Meteor.call 'deleteMe'
 
 Template.doc.source = -> Router.current().route.name is 'src'
 Template.doc.rows = -> ""+@text.split('\n').length
@@ -147,3 +170,6 @@ Template.signup.events
         password: t.find('#pw').value
       }, (err) -> if err then errCallback err
       else notify type: 'success', msg: 'check your email'
+
+Template.verify.events
+  'click #sendmail': -> Meteor.call 'sendVerificationEmail'
