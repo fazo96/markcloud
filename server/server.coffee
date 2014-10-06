@@ -6,7 +6,9 @@ validatedUser = (uid) ->
   return yes for mail in u.emails when mail.verified is yes; no
 
 Meteor.publish 'doc', (id) -> docs.find {_id: id}, limit: 1
-Meteor.publish 'docs', -> docs.find {}, fields: text: 0
+Meteor.publish 'docs', (userId) ->
+  if userId? then docs.find {owner: userId}, fields: text: 0
+  else docs.find {}, fields: text: 0
 Meteor.publish 'user', ->
   if @userId
     Meteor.users.find {_id: @userId}, fields: {dateCreated: 1}
@@ -18,9 +20,8 @@ docs.allow
       doc.dateCreated = moment().unix()
       if doc.owner and !uid then return no
       if uid then doc.owner = uid
-      console.log 'ok'
+      console.log doc.dateCreated
       return yes
-    console.log 'nope'
     return no
 docs.allow
   # Owners can update and remove their documents

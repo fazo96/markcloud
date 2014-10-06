@@ -28,11 +28,11 @@
 
 <template name="new">
   <p>Write your document in <a href="https://help.github.com/articles/github-flavored-markdown/">GitHub Flavored Markdown</a> then submit it with the button. You will be redirected to its permanent link</p>
-  <input type="text" id="title" class="form-control" placeholder="Title">
+  <input type="text" id="title" class="form-control" placeholder="Title" value="{{title}}">
   <input type="checkbox" id="show-title" checked> Show title in document
-  <textarea id="editor" class="form-control" rows="10" placeholder="Write your markdown :)" autofocus></textarea>
-  <button id="new-btn" class="btn btn-primary">
-    <i class="fa fa-upload"></i> Upload</button>
+  <textarea id="editor" class="form-control" rows="10" placeholder="Write your markdown :)" autofocus>{{text}}</textarea>
+  <button id="upload" class="btn btn-primary">
+    <i class="fa fa-upload"></i> {{#if _id}}Update{{else}}Upload{{/if}}</button>
 </template>
 
 <template name="docLayout">
@@ -41,29 +41,39 @@
 </template>
 
 <template name="doc">
+{{#if valid}}
   {{#if showTitle}}<h1>{{title}}</h1><hr>{{/if}}
-  {{#if text}}
+    <div class="notification-area">
+      {{> notifications}}
+    </div>
     {{#if source}}
     <textarea id="src" class="form-control" rows="{{rows}}" readonly>{{text}}</textarea>
     {{else}}
     <div id="doc">{{#markdown}}{{text}}{{/markdown}}</div>
     {{/if}}
-  {{else}}
+{{else}}
   <div class="text-center">
-    <h1>Sorry</h1>
-    <p>This document is empty, expired, or never existed.</p>
+    <h1>404</h1>
+    <div class="notification-area">
+      {{> notifications}}
+    </div>
+    <p>This document is invalid, expired, never existed or was deleted.</p>
   </div>
-  {{/if}}
+{{/if}}
   <hr>
   <div class="text-center">
     {{#unless currentUser}}
-      <a href="/login">Log in</a> to edit and delete your documents<br>
+      <p><a href="/login">Log in</a> to edit and delete your documents<br></p>
     {{/unless}}
+    {{#if owned}}
+      <p>This document is <b>yours</b>.</p>
+    {{/if}}
+    {{#if valid}}
     <div class="btn-group" id="tools">
-      {{#if currentUser}}
-      <button id="edit-doc" class="btn btn-primary" {{canEdit}}>
+      {{#if currentUser}}{{#if owned}}
+      <button id="edit-doc" class="btn btn-primary">
         <i class="fa fa-edit"></i> Edit</button>
-      {{/if}}
+      {{/if}}{{/if}}
       {{#if source}}
       <button id="src-doc" class="btn btn-success">
         <i class="fa fa-book"></i> View Document</button>
@@ -71,12 +81,13 @@
       <button id="src-doc" class="btn btn-success">
         <i class="fa fa-code"></i> View Source</button>
       {{/if}}
-      {{#if currentUser}}
+      {{#if currentUser}}{{#if owned}}
       <button id="del-doc" class="btn btn-danger">
         <i class="fa fa-trash"></i> Delete</button>
-      {{/if}}
+      {{/if}}{{/if}}
     </div>
-    <br>Powered by <a href="/">MarkCloud</a>
+    <br>
+    {{/if}}Powered by <a href="/">MarkCloud</a>
   </div>
 </template>
 
@@ -131,4 +142,10 @@
   <hr>
   <div class="text-center">Need an account? <a href="/signup">Sign Up!</a></div>
 </div>
+</template>
+
+<template name="list">
+{{#each documents}}
+<a href="/d/{{_id}}">{{title}}</a>
+{{/each}}
 </template>

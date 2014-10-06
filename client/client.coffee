@@ -35,6 +35,21 @@ Router.map ->
     onBeforeAction: ->
       Accounts.verifyEmail @params.token, (err) ->
         if err then errCallback err else Router.go 'home'
+  @route 'edit',
+    path: '/edit/:_id'
+    template: 'new'
+    waitOn: -> Meteor.subscribe 'doc', @params._id
+    data: -> docs.findOne @params._id
+  @route 'list',
+    path: '/list/:user?'
+    waitOn: -> Meteor.subscribe 'docs', @params.user
+    data: -> userId: @params.user
+    onBeforeAction: ->
+      if Meteor.user() and !@params.user
+        Router.go 'list', user: Meteor.user()._id
+    action: ->
+      if !@params.user then @render '404'
+      else @render()
   @route 'new'
   @route 'signup'
   @route 'signin', path: 'login'
@@ -57,28 +72,71 @@ Template.layout.showSpinner = ->
   Meteor.status().connected is no or Router.current().ready() is no
 Template.home.ndocs = -> docs.find().count()
 Template.new.events
-  'click #new-btn': (e,t) ->
+  'click #upload': (e,t) ->
     if t.find('#title').value is ''
       return notify msg: 'please insert a title'
     if t.find('#editor').value is ''
-      return notify msg: "can't create empty document"
-    docs.insert {
+      return notify msg: "empty documents are not valid"
+    if @_id then docs.update @_id, $set: {
+      title: t.find('#title').value
+      text: t.find('#editor').value
+      showTitle: $('#show-title').is(':checked')
+    }, (err) =>
+      if err then errCallback err
+      else
+        notify type:'success', msg:'Document updated'
+        Router.go 'doc', _id: @_id
+    else docs.insert {
       title: t.find('#title').value
       text: t.find('#editor').value
       showTitle: $('#show-title').is(':checked')
       dateCreated: moment().unix()
     }, (err,id) ->
-      errCallback err
+      if err then errCallback err
+      else notify type:'success', msg:'Document created successfully'
       if id then Router.go 'doc', _id: id
+    ###docs.upsert @_id, $set: {
+      title: t.find('#title').value
+      text: t.find('#editor').value
+      showTitle: $('#show-title').is(':checked')
+      dateCreated: moment().unix()
+    }, (err,resp) ->
+      if err then errCallback err
+      else if @_id
+        notify type:'success', msg:'Document updated'
+        Router.go 'doc', _id: @_id
+      else
+        notify type:'success', msg:'Document created successfully'
+        Router.go 'doc', _id: resp.insertedId###
+
+Template.list.documents = -> docs.find owner: @userId
 
 Template.doc.source = -> Router.current().route.name is 'src'
 Template.doc.rows = -> ""+@text.split('\n').length
-Template.doc.canEdit = -> "disabled" unless Meteor.user()._id is @owner
+Template.doc.valid = -> @text?
+Template.doc.owned = -> Meteor.user()._id is @owner
 Template.doc.events
+  'click #edit-doc': -> Router.go 'edit', _id: @_id
+  'click #del-doc': ->
+    if Meteor.user()._id is @owner
+      docs.remove @_id, (err) ->
+        if err then errCallback err
+        else notify type:'success', msg:'Document removed'
   'click #src-doc': ->
     if Router.current().route.name is 'src'
       Router.go 'doc', _id: @_id
     else Router.go 'src', _id: @_id
+
+Template.signin.events
+  'click #signin': (e,t) ->
+    if not t.find('#mail').value
+      return notify msg: 'please enter an email'
+    else if not t.find('#pw').value
+      return notify msg: "Please enter a password"
+    else
+      Meteor.loginWithPassword t.find('#mail').value, t.find('#pw').value,(e)->
+        if e then errCallback e
+        else notify type:'success', msg:'Welcome back!'; Router.go 'home'
 
 Template.signup.events
   'click #signup': (e,t) ->
