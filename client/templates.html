@@ -27,6 +27,11 @@
 </div>
 </template>
 
+<template name="docLayout">
+{{> yield region="outside"}}
+<div class="container">{{> yield}}</div>
+</template>
+
 <template name="home">
 {{#markdown}}
 ### Share your markdown easily
@@ -65,19 +70,16 @@ You will be able to delete your account and all your data whenever you want.
 </div>
 </template>
 
-<template name="new">
+<template name="editor">
   <p>Write your document in <a href="https://help.github.com/articles/github-flavored-markdown/">GitHub Flavored Markdown</a> then submit it with the button. You will be redirected to its permanent link</p>
   <input type="text" id="title" class="form-control" placeholder="Title" value="{{title}}">
   <input type="checkbox" id="show-title" {{showTitleChecked}}>
   Show title in document
+  <input type="checkbox" id="make-public" {{public}}>
+  Make document visible on your profile
   <textarea id="editor" class="form-control" rows="10" placeholder="Write your markdown :)" autofocus>{{text}}</textarea>
   <button id="upload" class="btn btn-primary">
     <i class="fa fa-upload"></i> {{#if _id}}Update{{else}}Create{{/if}}</button>
-</template>
-
-<template name="docLayout">
-{{> yield region="outside"}}
-<div class="container">{{> yield}}</div>
 </template>
 
 <template name="doc">
@@ -192,20 +194,12 @@ You will be able to delete your account and all your data whenever you want.
 
 <template name="profile">
 {{#if isMe}}
-<div class="text-center">
-  <p>Hello {{name}} ({{mail}}). This is your profile.</p>
-</div>
-{{/if}}
-{{#if noDocs}}
   <div class="text-center">
-  {{#if isMe}}
-    <p>You don't have any documents yet.</p>
-  {{else}}
-    <p>This user does not have any documents.</p>
-  {{/if}}
+    <p>Hello <b>{{username}}</b> ({{mail}}). This is your profile.</p>
+    {{#if noDocs}}
+      <p>You don't have any documents yet.</p>
+    {{/if}}
   </div>
-{{/if}}
-{{#if isMe}}
   <div class="text-center" id="profile-tools">
     <a class="btn btn-primary" id="logout">
       <i class="fa fa-sign-out"></i> Logout</a>
@@ -214,11 +208,24 @@ You will be able to delete your account and all your data whenever you want.
     <a class="btn btn-danger" href="/delete">
       <i class="fa fa-exclamation-circle"></i> Delete Account</a>
   </div>
+{{else}}
+  <div class="text-center">
+      {{#if noDocs}}
+        <p>{{username}} doesn't have any public documents.</p>
+      {{else}}
+        <p>These are {{username}}'s public documents.</p>
+      {{/if}}
+  </div>
 {{/if}}
 {{#unless noDocs}}
   <ul class="list-group">
     {{#each documents}}
-      <a class="list-group-item" href="/d/{{_id}}">{{title}}</a>
+      <a class="list-group-item" href="/d/{{_id}}">
+        {{title}}
+        {{#if public}}
+          <span class="label label-primary pull-right">Public</span>
+        {{/if}}
+      </a>
     {{/each}}
   </ul>
 {{/unless}}

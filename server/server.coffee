@@ -20,10 +20,13 @@ validatedUser = (uid) ->
 
 Meteor.publish 'doc', (id) -> docs.find {_id: id}, limit: 1
 Meteor.publish 'docs', (userId) ->
-  if userId? then docs.find {owner: userId}, fields: text: 0
+  if userId?
+    if userId is @userId
+      docs.find {owner: userId}, fields: text: 0
+    else docs.find {owner: userId, public: yes}, fields: text: 0
   else docs.find {}, fields: text: 0
 Meteor.publish 'user', (id) ->
-  Meteor.users.find {_id: id}, fields: {username: 1}
+  Meteor.users.find id, fields: {username: 1}
 
 docs.allow
   insert: (uid,doc) ->

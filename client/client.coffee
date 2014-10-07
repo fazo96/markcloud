@@ -23,11 +23,9 @@ loggedInController = RouteController.extend
 Router.map ->
   @route 'home',
     path: '/'
-    waitOn: -> Meteor.subscribe 'docs'
     action: ->
-      if !@ready()
-        @render(); @render 'spinner', to: 'outside'
-      else @render()
+      if !@ready() then @render 'spinner', to: 'outside'
+      @render()
   @route 'doc',
     path: '/d/:_id'
     controller: docController
@@ -41,7 +39,7 @@ Router.map ->
         if err then errCallback err else Router.go 'home'
   @route 'edit',
     path: '/edit/:_id'
-    template: 'new'
+    template: 'editor'
     controller: loggedInController
     waitOn: -> Meteor.subscribe 'doc', @params._id
     data: -> docs.findOne @params._id
@@ -50,16 +48,17 @@ Router.map ->
     waitOn: ->
       [Meteor.subscribe('docs', @params.user),
       Meteor.subscribe('user',@params.user)]
-    data: -> userId: @params.user
+    data: -> Meteor.users.findOne @params.user
     onBeforeAction: ->
       if Meteor.user() and !@params.user
         Router.go 'profile', user: Meteor.user()._id
     action: ->
-      if !@params.user then @render '404'
-      else @render()
+      if !@data() then @render '404'
+      else if @ready() then @render()
+      else @render 'loading'
   @route 'delete',
     controller: loggedInController
-  @route 'new'
+  @route 'new', template: 'editor'
   @route 'signup',
     controller: loggedOutController
   @route 'signin',
@@ -84,8 +83,8 @@ Template.layout.notHome = -> Router.current().route.name isnt 'home'
 Template.layout.showSpinner = ->
   Meteor.status().connected is no or Router.current().ready() is no
 Template.home.ndocs = -> docs.find().count()
-Template.new.showTitleChecked = -> return "checked" unless @showTitle is no
-Template.new.events
+Template.editor.showTitleChecked = -> return "checked" unless @showTitle is no
+Template.editor.events
   'click #upload': (e,t) ->
     if t.find('#title').value is ''
       return notify msg: 'please insert a title'
@@ -95,6 +94,7 @@ Template.new.events
       title: t.find('#title').value
       text: t.find('#editor').value
       showTitle: $('#show-title').is(':checked')
+      public: $('#make-public').is(':checked')
     }, (err) =>
       if err then errCallback err
       else
@@ -104,17 +104,17 @@ Template.new.events
       title: t.find('#title').value
       text: t.find('#editor').value
       showTitle: $('#show-title').is(':checked')
+      public: $('#make-public').is(':checked')
     }, (err,id) ->
       if err then errCallback err
       else notify type:'success', msg:'Document created successfully'
       if id then Router.go 'doc', _id: id
 
-Template.profile.name = -> Meteor.user().username
 Template.profile.isMe = ->
-  Meteor.user() and Meteor.user()._id is @userId
-Template.profile.noDocs = -> docs.find(owner: @userId).count() is 0
+  Meteor.user() and Meteor.user()._id is @_id
+Template.profile.noDocs = -> docs.find(owner: @_id).count() is 0
 Template.profile.documents = ->
-  docs.find {owner: @userId}, sort: dateCreated: -1
+  docs.find {owner: @_id}, sort: dateCreated: -1
 Template.profile.events
   'click #logout': -> Meteor.logout(); Router.go 'home'
 
