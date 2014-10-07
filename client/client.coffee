@@ -93,6 +93,7 @@ Template.layout.showSpinner = ->
   Meteor.status().connected is no or Router.current().ready() is no
 Template.home.rendered = ->
   $('.ttip').tooltip()
+Template.editor.isPublic = -> return "checked" if @public is yes
 Template.editor.showTitleChecked = -> return "checked" unless @showTitle is no
 Template.editor.events
   'click #upload': (e,t) ->
