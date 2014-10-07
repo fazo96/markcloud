@@ -20,14 +20,19 @@
         </a>
       {{/if}}
     {{else}}
-      {{#if notHome}}
-      <a class="pull-right" href="/">
-        <small><i class="fa fa-home"></i></small>
-      </a>
+      {{#if loggingIn}}
+        <a class="pull-right" href="/">
+          <small><i class="fa fa-cog fa-spin"></i></small></a>
       {{else}}
-      <a class="pull-right" href="/signup">
-        <small><i class="fa fa-user"></i></small>
-      </a>
+        {{#if notHome}}
+        <a class="pull-right" href="/">
+          <small><i class="fa fa-home"></i></small>
+        </a>
+        {{else}}
+        <a class="pull-right" href="/signup">
+          <small><i class="fa fa-user"></i></small>
+        </a>
+        {{/if}}
       {{/if}}
     {{/if}}
   </h1>
@@ -154,9 +159,9 @@ You will be able to delete your account and all your data whenever you want.
 </template>
 
 <template name="spinner">
-<div id="spinner">
+<!--<div id="spinner">
   <i class="fa fa-2x fa-cog fa-spin"></i>
-</div>
+</div>-->
 </template>
 
 <template name="404">
