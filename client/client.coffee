@@ -1,6 +1,11 @@
 docs = new Meteor.Collection 'docs'
 
+amIValid = ->
+  return no unless Meteor.user()
+  return yes for mail in Meteor.user().emails when mail.verified is yes; no
+
 UI.registerHelper 'mail', -> Meteor.user().emails[0].address
+UI.registerHelper 'amIValid', amIValid
 
 Router.configure
   layoutTemplate: 'layout'
@@ -17,6 +22,9 @@ docController = RouteController.extend
 
 loggedOutController = RouteController.extend
   onBeforeAction: -> if Meteor.user() then Router.go 'profile'
+  action: ->
+    @render()
+    if Meteor.loggingIn() then @render 'spinner', to: 'outside'
 loggedInController = RouteController.extend
   action: -> if !Meteor.user() then @render '404' else @render()
 
@@ -34,9 +42,10 @@ Router.map ->
     controller: docController
   @route 'verify',
     path: '/verify/:token?'
+    template: 'loading'
     onBeforeAction: ->
       Accounts.verifyEmail @params.token, (err) ->
-        if err then errCallback err else Router.go 'home'
+        if err then errCallback err else Router.go 'profile'
   @route 'edit',
     path: '/edit/:_id'
     template: 'editor'
@@ -82,7 +91,8 @@ Template.notifications.events
 Template.layout.notHome = -> Router.current().route.name isnt 'home'
 Template.layout.showSpinner = ->
   Meteor.status().connected is no or Router.current().ready() is no
-Template.home.ndocs = -> docs.find().count()
+Template.home.rendered = ->
+  $('.ttip').tooltip()
 Template.editor.showTitleChecked = -> return "checked" unless @showTitle is no
 Template.editor.events
   'click #upload': (e,t) ->
@@ -116,6 +126,10 @@ Template.profile.noDocs = -> docs.find(owner: @_id).count() is 0
 Template.profile.documents = ->
   docs.find {owner: @_id}, sort: dateCreated: -1
 Template.profile.events
+  'click #resend': ->
+    Meteor.call 'sendVerificationEmail', (e,r) ->
+      if e then errCallback e
+      else notify msg: r, type:'success'
   'click #logout': -> Meteor.logout(); Router.go 'home'
 
 Template.delete.events
@@ -170,6 +184,3 @@ Template.signup.events
         password: t.find('#pw').value
       }, (err) -> if err then errCallback err
       else notify type: 'success', msg: 'check your email'
-
-Template.verify.events
-  'click #sendmail': -> Meteor.call 'sendVerificationEmail'

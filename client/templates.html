@@ -10,15 +10,25 @@
 <div class="container">
   <h1>MarkCloud
     {{#if currentUser}}
-    <a class="pull-right" href="/u">
-      <small><i class="fa fa-chevron-right"></i></small>
-    </a>
+      {{#if amIValid}}
+        <a class="pull-right" href="/u">
+          <small><i class="fa fa-chevron-right"></i></small>
+        </a>
+      {{else}}
+        <a class="pull-right ttip" href="/u" data-toggle="tooltip" data-placement="left" title="Need email verification">
+          <small><i class="fa fa-envelope"></i></small>
+        </a>
+      {{/if}}
     {{else}}
-    {{#if notHome}}
-    <a class="pull-right" href="/">
-      <small><i class="fa fa-home"></i></small>
-    </a>
-    {{/if}}
+      {{#if notHome}}
+      <a class="pull-right" href="/">
+        <small><i class="fa fa-home"></i></small>
+      </a>
+      {{else}}
+      <a class="pull-right" href="/signup">
+        <small><i class="fa fa-user"></i></small>
+      </a>
+      {{/if}}
     {{/if}}
   </h1>
   <hr>
@@ -175,7 +185,8 @@ You will be able to delete your account and all your data whenever you want.
   <input type="text" class="form-control" id="name" placeholder="Username">
   <input type="password" class="form-control" placeholder="Password" id="pw">
   <input type="password" class="form-control" placeholder="Repeat Password" id="rpw">
-  <button class="btn btn-primary" id="signup">Sign Up</button>
+  <button class="btn btn-primary" id="signup">
+    <i class="fa fa-user"></i> Sign Up</button>
   <hr>
   <div class="text-center">Already have an account? <a href="/login">Sign in!</a></div>
 </div>
@@ -186,7 +197,8 @@ You will be able to delete your account and all your data whenever you want.
   <h2>Sign In</h2>
   <input type="text" class="form-control" id="mail" placeholder="E-Mail Address or Username">
   <input type="password" class="form-control" placeholder="Password" id="pw">
-  <button class="btn btn-primary" id="signin">Sign In</button>
+  <button class="btn btn-primary" id="signin">
+    <i class="fa fa-sign-in"></i> Sign In</button>
   <hr>
   <div class="text-center">Need an account? <a href="/signup">Sign Up!</a></div>
 </div>
@@ -199,12 +211,19 @@ You will be able to delete your account and all your data whenever you want.
     {{#if noDocs}}
       <p>You don't have any documents yet.</p>
     {{/if}}
+    {{#unless amIValid}}
+      <p class="lead">You need to verify your email address. Click the link in the email you received.</p>
+      <button class="btn btn-primary" id="resend">
+        <i class="fa fa-envelope"></i> Resend</button>
+    {{/unless}}
   </div>
   <div class="text-center" id="profile-tools">
     <a class="btn btn-primary" id="logout">
       <i class="fa fa-sign-out"></i> Logout</a>
+    {{#if amIValid}}
     <a class="btn btn-success" href="/new">
       <i class="fa fa-file-text"></i> New Document</a>
+    {{/if}}
     <a class="btn btn-danger" href="/delete">
       <i class="fa fa-exclamation-circle"></i> Delete Account</a>
   </div>
@@ -236,9 +255,4 @@ You will be able to delete your account and all your data whenever you want.
 <input type="text" class="form-control" id="name" placeholder="enter your User Id.">
 <button class="btn btn-danger" id="del-account">
   <i class="fa fa-exclamation-circle"></i> Confirm</button>
-</template>
-
-<template name="verify">
-<p>If you didn't receive anything at <b>{{mail}}</b> address press the button below.</p>
-<button id="sendmail" class="btn btn-primary">Resend</button>
 </template>
