@@ -6,7 +6,7 @@ amIValid = ->
   return yes for mail in Meteor.user().emails when mail.verified is yes; no
 
 UI.registerHelper 'mail', ->
-  if Meter.user().emails then Meteor.user().emails[0].address
+  if Meteor.user().emails then Meteor.user().emails[0].address
 UI.registerHelper 'amIValid', amIValid
 
 Router.configure
