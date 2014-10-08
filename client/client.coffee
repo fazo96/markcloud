@@ -57,15 +57,16 @@ Router.map ->
     waitOn: -> Meteor.subscribe 'doc', @params._id
     data: -> docs.findOne @params._id
   @route 'profile',
-    path: '/u/:user?'
+    path: '/@:user?'
     waitOn: ->
       [Meteor.subscribe('docs', @params.user),
-      Meteor.subscribe('user',@params.user)]
-    data: -> Meteor.users.findOne @params.user
+      Meteor.subscribe('user', @params.user)]
+    data: -> Meteor.users.findOne()
     onBeforeAction: ->
       if Meteor.user() and !@params.user
-        Router.go 'profile', user: Meteor.user()._id
+        @params.user = Meteor.user()._id
     action: ->
+      console.log @data()
       if !@data() then @render '404'
       else if @ready() then @render()
       else @render 'loading'

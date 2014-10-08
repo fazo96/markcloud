@@ -11,11 +11,11 @@
   <h1>MarkCloud
     {{#if currentUser}}
       {{#if amIValid}}
-        <a class="pull-right" href="/u">
+        <a class="pull-right" href="{{pathFor 'profile'}}">
           <small><i class="fa fa-chevron-right"></i></small>
         </a>
       {{else}}
-        <a class="pull-right ttip" href="/u" data-toggle="tooltip" data-placement="left" title="Need email verification">
+        <a class="pull-right ttip" href="{{pathFor 'profile'}}" data-toggle="tooltip" data-placement="left" title="Need email verification">
           <small><i class="fa fa-envelope"></i></small>
         </a>
       {{/if}}
@@ -29,7 +29,7 @@
           <small><i class="fa fa-home"></i></small>
         </a>
         {{else}}
-        <a class="pull-right" href="/signup">
+        <a class="pull-right" href="{{pathFor 'signup'}}">
           <small><i class="fa fa-user"></i></small>
         </a>
         {{/if}}
@@ -63,7 +63,7 @@ Made by [some guy in the internet](http://github.com/fazo96) that you probably s
 You can create a document _right now_. It will expire in 7 days.
 This home page is written in markdown too!
 {{/markdown}}
-<div class="text-center"><a class="btn btn-success" id="new" href="/new">
+<div class="text-center"><a class="btn btn-success" id="new" href="{{pathFor 'new'}}">
   <i class="fa fa-file-text"></i> New Document</a></div>
 {{#markdown}}
 ### But with an account...
@@ -78,9 +78,9 @@ You will be able to delete your account and all your data whenever you want.
   <a class="btn btn-primary" id="twitter-login">
     <i class="fa fa-twitter"></i> Log In With Twitter</a>
   <br>or<br>
-  <a class="btn btn-primary" href="/signup">
+  <a class="btn btn-primary" href="{{pathFor 'signup'}}">
     <i class="fa fa-user"></i> Sign Up</a>
-  <a class="btn btn-success" href="/login">
+  <a class="btn btn-success" href="{{pathFor 'signin'}}">
     <i class="fa fa-sign-in"></i> Log In</a>
 
 </div>
@@ -108,11 +108,11 @@ You will be able to delete your account and all your data whenever you want.
   <hr>
   <div class="text-center">
     {{#unless currentUser}}
-      <p><a href="/login">Log in</a> to edit and delete your documents<br></p>
+      <p><a href="{{pathFor 'signin'}}">Log in</a> to edit and delete your documents<br></p>
     {{/unless}}
     {{#if valid}}
       {{#if owned}}
-        <p>This document is <a href="/u">yours</a>.</p>
+        <p>This document is <a href="{{pathFor 'profile'}}">yours</a>.</p>
       {{else}}
         {{#unless owner}}
         <p>This anonymous document will <b>expire {{expirationDays}}</b></p>
@@ -170,7 +170,7 @@ You will be able to delete your account and all your data whenever you want.
   <button class="btn btn-primary" id="signup">
     <i class="fa fa-user"></i> Sign Up</button>
   <hr>
-  <div class="text-center">Already have an account? <a href="/login">Sign in!</a></div>
+  <div class="text-center">Already have an account? <a href="{{pathFor 'signin'}}">Sign in!</a></div>
 </div>
 </template>
 
@@ -182,7 +182,7 @@ You will be able to delete your account and all your data whenever you want.
   <button class="btn btn-primary" id="signin">
     <i class="fa fa-sign-in"></i> Sign In</button>
   <hr>
-  <div class="text-center">Need an account? <a href="/signup">Sign Up!</a></div>
+  <div class="text-center">Need an account? <a href="{{pathFor 'signup'}}">Sign Up!</a></div>
 </div>
 </template>
 
@@ -207,7 +207,7 @@ You will be able to delete your account and all your data whenever you want.
     <a class="btn btn-primary" id="logout">
       <i class="fa fa-sign-out"></i> Logout</a>
     {{#if amIValid}}
-    <a class="btn btn-success" href="/new">
+    <a class="btn btn-success" href="{{pathFor 'new'}}">
       <i class="fa fa-file-text"></i> New Document</a>
     {{/if}}
     <a class="btn btn-danger" id="deleteme">
