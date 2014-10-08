@@ -37,7 +37,6 @@
     {{/if}}
   </h1>
   <hr>
-  {{> notifications}}
   {{> yield}}
 </div>
 </template>
@@ -98,25 +97,12 @@ You will be able to delete your account and all your data whenever you want.
 </template>
 
 <template name="doc">
-{{#if valid}}
-  {{#if showTitle}}<h1>{{title}}</h1><hr>{{/if}}
-    <div class="notification-area">
-      {{> notifications}}
-    </div>
-    {{#if source}}
-    <textarea id="src" class="form-control" rows="{{rows}}" readonly>{{text}}</textarea>
-    {{else}}
-    <div id="doc">{{#markdown}}{{text}}{{/markdown}}</div>
-    {{/if}}
-{{else}}
-  <div class="text-center">
-    <h1>404</h1>
-    <div class="notification-area">
-      {{> notifications}}
-    </div>
-    <p>This document is invalid, expired, never existed or was deleted.</p>
-  </div>
-{{/if}}
+{{#if showTitle}}<h1>{{title}}</h1><hr>{{/if}}
+  {{#if source}}
+  <textarea id="src" class="form-control" rows="{{rows}}" readonly>{{text}}</textarea>
+  {{else}}
+  <div id="doc">{{#markdown}}{{text}}{{/markdown}}</div>
+  {{/if}}
   <hr>
   <div class="text-center">
     {{#unless currentUser}}
@@ -171,17 +157,6 @@ You will be able to delete your account and all your data whenever you want.
 </div>
 </template>
 
-<template name="notifications">
-{{#if notification}}
-<div class="center-block text-center">
-  <div class="alert alert-{{notification.type}} error">
-    <p align="center">{{notification.msg}}</p>
-    <button type="button" class="close close-error">&times;</button>
-  </div>
-</div>
-{{/if}}
-</template>
-
 <template name="signup">
 <div id="signup-container">
   <h2>Sign Up</h2>
@@ -229,7 +204,7 @@ You will be able to delete your account and all your data whenever you want.
     <a class="btn btn-success" href="/new">
       <i class="fa fa-file-text"></i> New Document</a>
     {{/if}}
-    <a class="btn btn-danger" href="/delete">
+    <a class="btn btn-danger" id="deleteme">
       <i class="fa fa-exclamation-circle"></i> Delete Account</a>
   </div>
 {{else}}

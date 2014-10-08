@@ -17,7 +17,10 @@ docController = RouteController.extend
   waitOn: -> Meteor.subscribe 'doc', @params._id
   data: -> docs.findOne @params._id
   action: ->
-    if @ready() then @render()
+    console.log @render
+    if @ready()
+      if @data()? then @render()
+      else @render '404'
     else @render 'loading'
 
 loggedOutController = RouteController.extend
@@ -65,8 +68,6 @@ Router.map ->
       if !@data() then @render '404'
       else if @ready() then @render()
       else @render 'loading'
-  @route 'delete',
-    controller: loggedInController
   @route 'new', template: 'editor'
   @route 'signup',
     controller: loggedOutController
@@ -75,32 +76,34 @@ Router.map ->
     controller: loggedOutController
   @route '404', path: '*'
 
-notification = new ReactiveVar()
 share.notify = notify = (opt) ->
-  if !opt then notification.set undefined
-  else
-    opt.type ?= "danger"
-    notification.set opt
+  if opt.type? then type = opt.type
+  else type = 'error'
+  if opt.title? then title = opt.title
+  else title = if type is 'error' then 'Error' else 'Ok'
+  swal title, opt.msg, type
+
 errCallback = (err) ->
   return unless err
-  if err.reason then notify msg: err.reason else notify msg: err
-Template.notifications.notification = -> notification.get()
-Template.notifications.events
-  'click .close': -> notify()
+  console.log err
+  if err.reason
+    notify title: err.code or 'Error', msg: err.reason, type: 'error'
+  else notify title: 'Error', msg: err, type: 'error'
 
 Template.layout.notHome = -> Router.current().route.name isnt 'home'
 Template.layout.showSpinner = ->
   Meteor.status().connected is no or Router.current().ready() is no
-Template.home.rendered = ->
-  $('.ttip').tooltip()
 Template.editor.isPublic = -> return "checked" if @public is yes
 Template.editor.showTitleChecked = -> return "checked" unless @showTitle is no
 Template.editor.events
   'click #upload': (e,t) ->
+    if Meteor.loggingIn()
+      return notify
+        msg: "Can't upload while Logging In.\nTry again in a few seconds."
     if t.find('#title').value is ''
-      return notify msg: 'please insert a title'
+      return notify msg: 'Please insert a title.'
     if t.find('#editor').value is ''
-      return notify msg: "empty documents are not valid"
+      return notify msg: "Empty documents are not valid."
     if @_id then docs.update @_id, $set: {
       title: t.find('#title').value
       text: t.find('#editor').value
@@ -109,7 +112,7 @@ Template.editor.events
     }, (err) =>
       if err then errCallback err
       else
-        notify type:'success', msg:'Document updated'
+        notify type:'success', msg:'Document updated.'
         Router.go 'doc', _id: @_id
     else docs.insert {
       title: t.find('#title').value
@@ -118,7 +121,7 @@ Template.editor.events
       public: $('#make-public').is(':checked')
     }, (err,id) ->
       if err then errCallback err
-      else notify type:'success', msg:'Document created successfully'
+      else notify type:'success', msg:'Document created successfully!'
       if id then Router.go 'doc', _id: id
 
 Template.profile.isMe = ->
@@ -132,15 +135,19 @@ Template.profile.events
       if e then errCallback e
       else notify msg: r, type:'success'
   'click #logout': -> Meteor.logout(); Router.go 'home'
-
-Template.delete.events
-  'click #del-account': (e,t) ->
-    if t.find('#name').value is Meteor.user()._id
-      Meteor.call 'deleteMe'
+  'click #deleteme': -> swal {
+    title: 'Are you sure?'
+    text: 'Do you want to permanently delete all your data?'
+    type: 'warning'
+    showCancelButton: yes
+    confirmButtonColor: "#DD6B55"
+    confirmButtonText: "Yes!"
+    }, -> Meteor.call 'deleteMe', (e,r) ->
+    if e then errCallback e
+    else notify type: 'success', msg: 'Account deleted'
 
 Template.doc.source = -> Router.current().route.name is 'src'
 Template.doc.rows = -> ""+@text.split('\n').length
-Template.doc.valid = -> @text?
 Template.doc.owned = -> Meteor.user()._id is @owner
 Template.doc.expirationDays = ->
   if @owner then return 'never'
@@ -149,7 +156,14 @@ Template.doc.events
   'click #edit-doc': -> Router.go 'edit', _id: @_id
   'click #del-doc': ->
     if Meteor.user()._id is @owner
-      docs.remove @_id, (err) ->
+      swal {
+        title: 'Are you sure?'
+        text: 'This document will be deleted permanently'
+        type: 'warning'
+        showCancelButton: yes
+        confirmButtonColor: "#DD6B55"
+        confirmButtonText: "Yes!"
+      }, => docs.remove @_id, (err) ->
         if err then errCallback err
         else notify type:'success', msg:'Document removed'
   'click #src-doc': ->
