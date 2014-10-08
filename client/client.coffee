@@ -146,6 +146,7 @@ Template.profile.events
     if e then errCallback e
     else notify type: 'success', msg: 'Account deleted'
 
+Template.doc.valid = -> @text?
 Template.doc.source = -> Router.current().route.name is 'src'
 Template.doc.rows = -> ""+@text.split('\n').length
 Template.doc.owned = -> Meteor.user()._id is @owner
