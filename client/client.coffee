@@ -25,7 +25,8 @@ docController = RouteController.extend
     else @render 'loading'
 
 loggedOutController = RouteController.extend
-  onBeforeAction: -> if Meteor.user() then Router.go 'profile'
+  onBeforeAction: ->
+    if Meteor.user() then Router.go 'profile', user: Meteor.user().username
   action: ->
     @render()
     if Meteor.loggingIn() then @render 'spinner', to: 'outside'
@@ -41,6 +42,9 @@ Router.map ->
   @route 'doc',
     path: '/d/:_id'
     controller: docController
+  @route 'userDoc',
+    path: '/@:owner/:_id'
+    controller: docController
   @route 'src',
     path:'/src/:_id'
     controller: docController
@@ -49,7 +53,8 @@ Router.map ->
     template: 'loading'
     onBeforeAction: ->
       Accounts.verifyEmail @params.token, (err) ->
-        if err then errCallback err else Router.go 'profile'
+        if err then errCallback err
+        else Router.go 'profile', user: Meteor.user().username
   @route 'edit',
     path: '/edit/:_id'
     template: 'editor'
@@ -64,12 +69,10 @@ Router.map ->
     data: -> Meteor.users.findOne()
     onBeforeAction: ->
       if Meteor.user() and !@params.user
-        @params.user = Meteor.user()._id
+        @params.user = Meteor.user().username
     action: ->
-      console.log @data()
-      if !@data() then @render '404'
-      else if @ready() then @render()
-      else @render 'loading'
+      if !@ready() or Meteor.loggingIn() then @render 'loading'
+      else if !@data() then @render '404' else @render()
   @route 'new', template: 'editor'
   @route 'signup',
     controller: loggedOutController

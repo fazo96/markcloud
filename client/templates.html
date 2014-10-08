@@ -94,6 +94,8 @@ You will be able to delete your account and all your data whenever you want.
   <input type="checkbox" id="make-public" {{isPublic}}>
   Make document visible on your profile
   <textarea id="editor" class="form-control" rows="10" placeholder="Write your markdown :)" autofocus>{{text}}</textarea>
+  <p>Remember that this app is still in development so you should keep a backup
+    of your text somewhere else in case something goes wrong!</p>
   <button id="upload" class="btn btn-primary">
     <i class="fa fa-upload"></i> {{#if _id}}Update{{else}}Create{{/if}}</button>
 </template>
