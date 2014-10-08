@@ -14,6 +14,22 @@ If you want to set up a server, make sure to configure the `MAIL_URL`
 and `ROOT_URL` environment variables as explained in the
 [Meteor Docs](http://docs.meteor.com).
 
+#### Twitter Authentication
+
+Create this file: `server/settings.coffee` with this content:
+
+```coffeescript
+Meteor.startup ->
+  Accounts.loginServiceConfiguration.remove service : 'twitter'
+  Accounts.loginServiceConfiguration.insert
+    service: 'twitter'
+    consumerKey: 'Your API key'
+    secret: 'Your API secret'
+```
+
+Your users will now be able to login using twitter. You may want to disable the
+button if you don't configure twitter authentication.
+
 ## License
 
 The MIT License (MIT)

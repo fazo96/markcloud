@@ -1,5 +1,7 @@
 accounts-base@1.1.1
+accounts-oauth@1.1.1
 accounts-password@1.0.2
+accounts-twitter@1.0.1
 application-configuration@1.0.2
 autoupdate@1.1.1
 base64@1.0.0
@@ -44,6 +46,8 @@ mongo@1.0.6
 mrt:moment@2.8.1
 natestrauser:font-awesome@4.2.0
 npm-bcrypt@0.7.7
+oauth1@1.1.0
+oauth@1.1.0
 observe-sequence@1.0.2
 ordered-dict@1.0.0
 perak:markdown@1.0.4
@@ -61,6 +65,7 @@ spacebars@1.0.2
 srp@1.0.0
 templating@1.0.7
 tracker@1.0.2
+twitter@1.1.0
 ui@1.0.3
 underscore@1.0.0
 url@1.0.0

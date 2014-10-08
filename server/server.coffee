@@ -16,6 +16,7 @@ Meteor.startup ->
 validatedUser = (uid) ->
   u = Meteor.users.findOne uid
   return no unless u
+  return yes if u.services.twitter
   return yes for mail in u.emails when mail.verified is yes; no
 
 Meteor.publish 'doc', (id) -> docs.find {_id: id}, limit: 1
@@ -26,9 +27,10 @@ Meteor.publish 'docs', (userId) ->
     else docs.find {owner: userId, public: yes}, fields: text: 0
   else docs.find {}, fields: text: 0
 Meteor.publish 'user', (id) ->
+  id ?= @userId
   if @userId is id
-    Meteor.users.find id, fields: {username: 1, emails: 1}
-  else Meteor.users.find id, fields: {username: 1}
+    Meteor.users.find id, fields: { username: 1, emails: 1, profile: 1 }
+  else Meteor.users.find id, fields: { username : 1, profile: 1 }
 
 docs.allow
   insert: (uid,doc) ->

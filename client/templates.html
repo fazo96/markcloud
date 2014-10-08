@@ -50,9 +50,7 @@
 {{#markdown}}
 ### Share your markdown easily
 
-Markcloud is a simple application that lets you share your markdown documents
-to the world. Just paste your markdown and get a _permanent link_ that lets you
-and everyone else view the result in a **modern responsive web page**.
+Markcloud is a simple application that lets you share your markdown documents to the world. Just paste your markdown and get a _permanent link_ that lets you and everyone else view the result in a **modern responsive web page**.
 
 ### Free as in Free Software
 
@@ -77,10 +75,14 @@ This home page is written in markdown too!
 You will be able to delete your account and all your data whenever you want.
 {{/markdown}}
 <div class="text-center" id="btns">
+  <a class="btn btn-primary" id="twitter-login">
+    <i class="fa fa-twitter"></i> Log In With Twitter</a>
+  <br>or<br>
   <a class="btn btn-primary" href="/signup">
     <i class="fa fa-user"></i> Sign Up</a>
   <a class="btn btn-success" href="/login">
     <i class="fa fa-sign-in"></i> Log In</a>
+
 </div>
 </template>
 
@@ -187,7 +189,11 @@ You will be able to delete your account and all your data whenever you want.
 <template name="profile">
 {{#if isMe}}
   <div class="text-center">
-    <p>Hello <b>{{username}}</b> ({{mail}}). This is your profile.</p>
+    {{#if mail}}
+      <p>Hello <b>{{username}}</b> ({{mail}}). This is your profile.</p>
+    {{else}}
+      <p>Hello <b>{{profile.name}}</b> (@{{username}}). This is your profile.</p>
+    {{/if}}
     {{#if noDocs}}
       <p>You don't have any documents yet.</p>
     {{/if}}
@@ -210,9 +216,9 @@ You will be able to delete your account and all your data whenever you want.
 {{else}}
   <div class="text-center">
       {{#if noDocs}}
-        <p>{{username}} doesn't have any public documents.</p>
+        <p>@{{username}} doesn't have any public documents.</p>
       {{else}}
-        <p>These are {{username}}'s public documents.</p>
+        <p>These are @{{username}}'s public documents.</p>
       {{/if}}
   </div>
 {{/if}}

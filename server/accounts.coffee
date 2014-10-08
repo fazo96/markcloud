@@ -13,6 +13,9 @@ Accounts.config {
 # Code that checks if a new user request is valid
 Accounts.validateNewUser (user) ->
   user.dateCreated = moment().unix()
+  if user.services.twitter?
+    user.username = user.services.twitter.screenName
+    return yes
   mail = user.emails[0].address
   if Match.test(mail,String) is no or validateEmail(mail) is no
     throw new Meteor.Error 403, "Invalid Email"

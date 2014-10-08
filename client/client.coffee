@@ -2,9 +2,11 @@ docs = new Meteor.Collection 'docs'
 
 amIValid = ->
   return no unless Meteor.user()
+  return yes if !Meteor.user().emails?
   return yes for mail in Meteor.user().emails when mail.verified is yes; no
 
-UI.registerHelper 'mail', -> Meteor.user().emails[0].address
+UI.registerHelper 'mail', ->
+  if Meter.user().emails then Meteor.user().emails[0].address
 UI.registerHelper 'amIValid', amIValid
 
 Router.configure
@@ -17,7 +19,6 @@ docController = RouteController.extend
   waitOn: -> Meteor.subscribe 'doc', @params._id
   data: -> docs.findOne @params._id
   action: ->
-    console.log @render
     if @ready()
       if @data()? then @render()
       else @render '404'
@@ -85,14 +86,20 @@ share.notify = notify = (opt) ->
 
 errCallback = (err) ->
   return unless err
-  console.log err
   if err.reason
     notify title: err.code or 'Error', msg: err.reason, type: 'error'
   else notify title: 'Error', msg: err, type: 'error'
 
 Template.layout.notHome = -> Router.current().route.name isnt 'home'
-Template.layout.showSpinner = ->
-  Meteor.status().connected is no or Router.current().ready() is no
+Template.layout.showSpinner = -> Meteor.status().connected is yes
+Template.home.events
+  'click #twitter-login': ->
+    if Meteor.user() then return notify msg: "You're already Logged In!"
+    Meteor.loginWithTwitter {}, (e) ->
+      if e then errCallback e
+      else
+        Meteor.subscribe 'user'
+        notify type: 'success', msg: 'Logged in'
 Template.editor.isPublic = -> return "checked" if @public is yes
 Template.editor.showTitleChecked = -> return "checked" unless @showTitle is no
 Template.editor.events
