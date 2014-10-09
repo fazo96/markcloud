@@ -61,6 +61,9 @@ Router.map ->
     controller: loggedInController
     waitOn: -> Meteor.subscribe 'doc', @params._id
     data: -> docs.findOne @params._id
+    action: ->
+      if !Meteor.user() then @render '404'
+      else if @ready() then @render()
   @route 'profile',
     path: '/@:user'
     waitOn: ->
@@ -102,6 +105,13 @@ Template.home.events
       else
         Meteor.subscribe 'user'
         notify type: 'success', msg: 'Logged in'
+
+Template.editor.rendered = ->
+  ed = MandrillAce.getInstance(); ed.isFocused()
+  #ed.setTheme 'ace/theme/monokai'
+  ed.setMode 'ace/mode/markdown'
+  if Router.current().data().text
+    ed.ace.setValue Router.current().data().text
 Template.editor.isPublic = -> return "checked" if @public is yes
 Template.editor.showTitleChecked = -> return "checked" unless @showTitle is no
 Template.editor.events
