@@ -162,8 +162,7 @@ Template.doc.owned = -> Meteor.user() and Meteor.user()._id is @owner
 Template.doc.privateUrl = ->
 Template.doc.ownerName = ->
   if Router.current().route.name is 'userDoc'
-    console.log Router.current()
-    return Router.current().params.owner
+    return Router.current().params.user
 Template.doc.expirationDays = ->
   if @owner then return 'never'
   else return moment.unix(@dateCreated).add(7,'days').fromNow()
