@@ -92,7 +92,7 @@ errCallback = (err) ->
     notify title: err.code or 'Error', msg: err.reason, type: 'error'
   else notify title: 'Error', msg: err, type: 'error'
 
-Template.layout.notHome = -> Router.current().route.name isnt 'home'
+Template.magicIcon.notHome = -> Router.current().route.name isnt 'home'
 Template.layout.showSpinner = -> Meteor.status().connected is yes
 Template.home.events
   'click #twitter-login': ->

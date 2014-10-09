@@ -12,48 +12,51 @@
     </div>
   </div>
 </template>
+<template name="magicIcon">
+{{#if currentUser}}
+  {{#if amIValid}}
+    <a id="icon" class="pull-right" href="{{pathFor 'profile' user=currentUser.username}}">
+      <small><i class="fa fa-chevron-right"></i></small>
+    </a>
+  {{else}}
+    <a class="pull-right" id="icon" href="{{pathFor 'profile' user=currentUser.username}}" data-toggle="tooltip" data-placement="left" title="Need email verification">
+      <small><i class="fa fa-envelope"></i></small>
+    </a>
+  {{/if}}
+{{else}}
+  {{#if loggingIn}}
+    <a class="pull-right" href="/">
+      <small><i class="fa fa-cog fa-spin"></i></small></a>
+  {{else}}
+    {{#if notHome}}
+    <a class="pull-right" href="/">
+      <small><i class="fa fa-home"></i></small>
+    </a>
+    {{else}}
+    <a class="pull-right" href="{{pathFor 'signup'}}">
+      <small><i class="fa fa-user"></i></small>
+    </a>
+    {{/if}}
+  {{/if}}
+{{/if}}
+</template>
+
+<template name="title">
+  <h1><a id="big-title" href="/">MarkCloud</a>{{> magicIcon}}</h1>
+</template>
 
 <template name="layout">
 {{>ribbon}}
 {{> yield region="outside"}}
 <div class="container">
-  <h1><a id="big-title" href="/">MarkCloud</a>
-    {{#if currentUser}}
-      {{#if amIValid}}
-        <a id="icon" class="pull-right" href="{{pathFor 'profile' user=currentUser.username}}">
-          <small><i class="fa fa-chevron-right"></i></small>
-        </a>
-      {{else}}
-        <a class="pull-right" id="icon" href="{{pathFor 'profile' user=currentUser.username}}" data-toggle="tooltip" data-placement="left" title="Need email verification">
-          <small><i class="fa fa-envelope"></i></small>
-        </a>
-      {{/if}}
-    {{else}}
-      {{#if loggingIn}}
-        <a class="pull-right" href="/">
-          <small><i class="fa fa-cog fa-spin"></i></small></a>
-      {{else}}
-        {{#if notHome}}
-        <a class="pull-right" href="/">
-          <small><i class="fa fa-home"></i></small>
-        </a>
-        {{else}}
-        <a class="pull-right" href="{{pathFor 'signup'}}">
-          <small><i class="fa fa-user"></i></small>
-        </a>
-        {{/if}}
-      {{/if}}
-    {{/if}}
-  </h1>
-  <hr>
-  {{> yield}}
+  {{> title}} <hr> {{> yield}}
 </div>
 </template>
 
 <template name="docLayout">
 {{>ribbon}}
 {{> yield region="outside"}}
-<div class="container">{{> yield}}</div>
+<div class="container"> {{> yield}} </div>
 </template>
 
 <template name="home">
@@ -119,13 +122,14 @@ You will be able to delete your account and all your data whenever you want.
   {{/if}}
   <hr>
   <div class="text-center">
+    <!--{{> title}} <hr>-->
     {{#unless currentUser}}
       <p><a href="{{pathFor 'signin'}}">Log in</a> to edit and delete your documents<br></p>
     {{/unless}}
     {{#if valid}}
       {{#if owned}}
         <p>This document is <a id="owner-link" href="{{pathFor 'profile' user=currentUser.username}}">yours</a>.</p>
-        <p>You can link this document using a <a href="{{pathFor 'userDoc' user=currentUser.username _id=this._id}}">public</a> or <a href="{{pathFor 'doc'}}">anonymous link</a>.</p>
+        <p>You can link this document using a <a href="{{pathFor 'userDoc' user=currentUser.username _id=this._id}}">public</a> or <a href="{{pathFor 'doc'}}">anonymous</a> link.</p>
         <p>Anonymous links don't reveal your profile.</p>
       {{else}}
         {{#if ownerName}}
@@ -154,7 +158,8 @@ You will be able to delete your account and all your data whenever you want.
         {{/if}}{{/if}}
       </div>
       <br>
-    {{/if}}Powered by <a href="/">MarkCloud</a>
+    {{/if}}
+    Powered by <a href="/">MarkCloud</a>
   </div>
 </template>
 
