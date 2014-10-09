@@ -125,7 +125,7 @@ Template.editor.events
       return notify msg: "Empty documents are not valid."
     if @_id then docs.update @_id, $set: {
       title: t.find('#title').value
-      text: t.find('#editor').value
+      text: MandrillAce.getInstance().value()
       showTitle: $('#show-title').is(':checked')
       public: $('#make-public').is(':checked')
     }, (err) =>
@@ -135,7 +135,7 @@ Template.editor.events
         Router.go 'doc', _id: @_id
     else docs.insert {
       title: t.find('#title').value
-      text: t.find('#editor').value
+      text: MandrillAce.getInstance().value()
       showTitle: $('#show-title').is(':checked')
       public: $('#make-public').is(':checked')
     }, (err,id) ->
