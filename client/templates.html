@@ -5,10 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
+<template name="ribbon">
+  <div class="github-fork-ribbon-wrapper right">
+    <div class="github-fork-ribbon">
+      <a href="http://github.com/fazo96/markcloud">Fork me on GitHub</a>
+    </div>
+  </div>
+</template>
+
 <template name="layout">
+{{>ribbon}}
 {{> yield region="outside"}}
 <div class="container">
-  <h1>MarkCloud
+  <h1><a id="big-title" href="/">MarkCloud</a>
     {{#if currentUser}}
       {{#if amIValid}}
         <a id="icon" class="pull-right" href="{{pathFor 'profile' user=currentUser.username}}">
@@ -42,6 +51,7 @@
 </template>
 
 <template name="docLayout">
+{{>ribbon}}
 {{> yield region="outside"}}
 <div class="container">{{> yield}}</div>
 </template>
