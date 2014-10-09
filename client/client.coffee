@@ -43,7 +43,7 @@ Router.map ->
     path: '/d/:_id'
     controller: docController
   @route 'userDoc',
-    path: '/@:owner/:_id'
+    path: '/@:user/:_id'
     controller: docController
   @route 'src',
     path:'/src/:_id'
@@ -62,20 +62,18 @@ Router.map ->
     waitOn: -> Meteor.subscribe 'doc', @params._id
     data: -> docs.findOne @params._id
   @route 'profile',
-    path: '/@:user?'
+    path: '/@:user'
     waitOn: ->
       [Meteor.subscribe('docs', @params.user),
       Meteor.subscribe('user', @params.user)]
-    data: -> Meteor.users.findOne()
-    onBeforeAction: ->
-      if Meteor.user() and !@params.user
-        @params.user = Meteor.user().username
+    data: -> Meteor.users.findOne username: @params.user
     action: ->
-      if !@ready() or Meteor.loggingIn() then @render 'loading'
-      else if !@data() then @render '404' else @render()
+      if Meteor.loggingIn() then @render 'loading'
+      else if @ready()
+        if !@data() then @render '404' else @render()
+      else @render 'loading'
   @route 'new', template: 'editor'
-  @route 'signup',
-    controller: loggedOutController
+  @route 'signup', controller: loggedOutController
   @route 'signin',
     path: 'login'
     controller: loggedOutController
@@ -160,7 +158,12 @@ Template.profile.events
 Template.doc.valid = -> @text?
 Template.doc.source = -> Router.current().route.name is 'src'
 Template.doc.rows = -> ""+@text.split('\n').length
-Template.doc.owned = -> Meteor.user()._id is @owner
+Template.doc.owned = -> Meteor.user() and Meteor.user()._id is @owner
+Template.doc.privateUrl = ->
+Template.doc.ownerName = ->
+  if Router.current().route.name is 'userDoc'
+    console.log Router.current()
+    return Router.current().params.owner
 Template.doc.expirationDays = ->
   if @owner then return 'never'
   else return moment.unix(@dateCreated).add(7,'days').fromNow()

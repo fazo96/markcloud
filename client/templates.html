@@ -11,11 +11,11 @@
   <h1>MarkCloud
     {{#if currentUser}}
       {{#if amIValid}}
-        <a class="pull-right" href="{{pathFor 'profile'}}">
+        <a id="icon" class="pull-right" href="{{pathFor 'profile' user=currentUser.username}}">
           <small><i class="fa fa-chevron-right"></i></small>
         </a>
       {{else}}
-        <a class="pull-right ttip" href="{{pathFor 'profile'}}" data-toggle="tooltip" data-placement="left" title="Need email verification">
+        <a class="pull-right" id="icon" href="{{pathFor 'profile' user=currentUser.username}}" data-toggle="tooltip" data-placement="left" title="Need email verification">
           <small><i class="fa fa-envelope"></i></small>
         </a>
       {{/if}}
@@ -114,11 +114,17 @@ You will be able to delete your account and all your data whenever you want.
     {{/unless}}
     {{#if valid}}
       {{#if owned}}
-        <p>This document is <a href="{{pathFor 'profile'}}">yours</a>.</p>
+        <p>This document is <a id="owner-link" href="{{pathFor 'profile' user=currentUser.username}}">yours</a>.</p>
+        <p>You can link this document using a <a href="{{pathFor 'userDoc' user=currentUser.username _id=this._id}}">public</a> or <a href="{{pathFor 'doc'}}">anonymous link</a>.</p>
+        <p>Anonymous links don't reveal your profile.</p>
       {{else}}
-        {{#unless owner}}
-        <p>This anonymous document will <b>expire {{expirationDays}}</b></p>
-        {{/unless}}
+        {{#if ownerName}}
+        <p>Document owned by <a href="{{pathFor 'profile' user=currentUser.username}}">{{ownerName}}</a></p>
+        {{else}}
+          {{#unless owner}}
+            <p>This anonymous document will <b>expire {{expirationDays}}</b></p>
+          {{/unless}}
+        {{/if}}
       {{/if}}
       <div class="btn-group" id="tools">
         {{#if currentUser}}{{#if owned}}
