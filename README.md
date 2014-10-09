@@ -14,6 +14,10 @@ If you want to set up a server, make sure to configure the `MAIL_URL`
 and `ROOT_URL` environment variables as explained in the
 [Meteor Docs](http://docs.meteor.com).
 
+You'll probably also need [phantomjs](http://phantomjs.org/) installed
+since the apps now depends on Meteor's
+[spiderable](http://docs.meteor.com/#spiderable) package.
+
 #### Twitter Authentication
 
 Create this file: `server/settings.coffee` with this content:
