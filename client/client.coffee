@@ -27,57 +27,63 @@ docController = RouteController.extend
 loggedOutController = RouteController.extend
   onBeforeAction: ->
     if Meteor.user() then Router.go 'profile', user: Meteor.user().username
+    @next()
   action: ->
     @render()
     if Meteor.loggingIn() then @render 'spinner', to: 'outside'
 loggedInController = RouteController.extend
   action: -> if !Meteor.user() then @render '404' else @render()
 
-Router.map ->
-  @route 'home',
-    path: '/'
-    action: ->
-      if !@ready() then @render 'spinner', to: 'outside'
-      @render()
-  @route 'doc',
-    path: '/d/:_id'
-    controller: docController
-  @route 'userDoc',
-    path: '/@:user/:_id'
-    controller: docController
-  @route 'src',
-    path:'/src/:_id'
-    controller: docController
-  @route 'verify',
-    path: '/verify/:token?'
-    template: 'loading'
-    onBeforeAction: ->
-      Accounts.verifyEmail @params.token, (err) ->
-        if err then errCallback err
-        else Router.go 'profile', user: Meteor.user().username
-  @route 'edit',
-    path: '/edit/:_id'
-    template: 'editor'
-    controller: loggedInController
-    waitOn: -> Meteor.subscribe 'doc', @params._id
-    data: -> docs.findOne @params._id
-  @route 'profile',
-    path: '/@:user'
-    waitOn: ->
-      [Meteor.subscribe('docs', @params.user),
-      Meteor.subscribe('user', @params.user)]
-    data: -> Meteor.users.findOne username: @params.user
-    action: ->
-      if Meteor.loggingIn() then @render 'loading'
-      else if @ready()
-        if !@data() then @render '404' else @render()
-      else @render 'loading'
-  @route 'new', template: 'editor'
-  @route 'signup', controller: loggedOutController
-  @route 'signin',
-    path: 'login'
-    controller: loggedOutController
-  @route '404', path: '*'
+Router.route '/',
+  name: 'home'
+  action: ->
+    if !@ready() then @render 'spinner', to: 'outside'
+    @render('home')
+Router.route '/d/:_id',
+  name: 'doc'
+  controller: docController
+Router.route '/@:user/:_id',
+  name: 'userDoc'
+  controller: docController
+Router.route '/src/:_id',
+  name: 'src'
+  controller: docController
+Router.route '/verify/:token?',
+  name: 'verify'
+  template: 'loading'
+  onBeforeAction: ->
+    Accounts.verifyEmail @params.token, (err) ->
+      if err then errCallback err
+      else Router.go 'profile', user: Meteor.user().username
+    @next()
+Router.route '/edit/:_id',
+  name: 'edit'
+  template: 'editor'
+  controller: loggedInController
+  waitOn: -> Meteor.subscribe 'doc', @params._id
+  data: -> docs.findOne @params._id
+Router.route '/@:user',
+  name: 'profile'
+  waitOn: ->
+    [Meteor.subscribe('docs', @params.user),
+    Meteor.subscribe('user', @params.user)]
+  data: -> Meteor.users.findOne username: @params.user
+  action: ->
+    if Meteor.loggingIn() then @render 'loading'
+    else if @ready()
+      if !@data() then @render '404' else @render()
+    else @render 'loading'
+Router.route '/new',
+  name: 'new'
+  template: 'editor'
+Router.route '/signup',
+  name: 'signup'
+  controller: loggedOutController
+Router.route '/login',
+  name: 'signin'
+  template: 'signin'
+  controller: loggedOutController
+Router.route '/(.*)', name: '404'
 
 share.notify = notify = (opt) ->
   if opt.type? then type = opt.type
@@ -92,8 +98,10 @@ errCallback = (err) ->
     notify title: err.code or 'Error', msg: err.reason, type: 'error'
   else notify title: 'Error', msg: err, type: 'error'
 
-Template.magicIcon.notHome = -> Router.current().route.name isnt 'home'
-Template.layout.showSpinner = -> Meteor.status().connected is yes
+Template.magicIcon.helpers
+  notHome: -> Router.current().route.getName() isnt 'home'
+Template.layout.helpers
+  showSpinner: -> Meteor.status().connected is yes
 Template.home.events
   'click #twitter-login': ->
     if Meteor.user() then return notify msg: "You're already Logged In!"
@@ -102,8 +110,9 @@ Template.home.events
       else
         Meteor.subscribe 'user'
         notify type: 'success', msg: 'Logged in'
-Template.editor.isPublic = -> return "checked" if @public is yes
-Template.editor.showTitleChecked = -> return "checked" unless @showTitle is no
+Template.editor.helpers
+  isPublic: -> return "checked" if @public is yes
+  showTitleChecked: -> return "checked" unless @showTitle is no
 Template.editor.events
   'click #upload': (e,t) ->
     if Meteor.loggingIn()
@@ -133,11 +142,10 @@ Template.editor.events
       else notify type:'success', msg:'Document created successfully!'
       if id then Router.go 'doc', _id: id
 
-Template.profile.isMe = ->
-  Meteor.user() and Meteor.user()._id is @_id
-Template.profile.noDocs = -> docs.find(owner: @_id).count() is 0
-Template.profile.documents = ->
-  docs.find {owner: @_id}, sort: dateCreated: -1
+Template.profile.helpers
+  isMe: -> Meteor.user() and Meteor.user()._id is @_id
+  noDocs: -> docs.find(owner: @_id).count() is 0
+  documents: -> docs.find {owner: @_id}, sort: dateCreated: -1
 Template.profile.events
   'click #resend': ->
     Meteor.call 'sendVerificationEmail', (e,r) ->
@@ -155,17 +163,17 @@ Template.profile.events
     if e then errCallback e
     else notify type: 'success', msg: 'Account deleted'
 
-Template.doc.valid = -> @text?
-Template.doc.source = -> Router.current().route.name is 'src'
-Template.doc.rows = -> ""+@text.split('\n').length
-Template.doc.owned = -> Meteor.user() and Meteor.user()._id is @owner
-Template.doc.privateUrl = ->
-Template.doc.ownerName = ->
-  if Router.current().route.name is 'userDoc'
-    return Router.current().params.user
-Template.doc.expirationDays = ->
-  if @owner then return 'never'
-  else return moment.unix(@dateCreated).add(7,'days').fromNow()
+Template.doc.helpers
+  valid: -> @text?
+  source: -> Router.current().route.getName() is 'src'
+  rows: -> ""+@text.split('\n').length
+  owned: -> Meteor.user() and Meteor.user()._id is @owner
+  ownerName: ->
+    if Router.current().route.getName() is 'userDoc'
+      return Router.current().params.user
+  expirationDays: ->
+    if @owner then return 'never'
+    else return moment.unix(@dateCreated).add(7,'days').fromNow()
 Template.doc.events
   'click #edit-doc': -> Router.go 'edit', _id: @_id
   'click #del-doc': ->
@@ -181,7 +189,7 @@ Template.doc.events
         if err then errCallback err
         else notify type:'success', msg:'Document removed'
   'click #src-doc': ->
-    if Router.current().route.name is 'src'
+    if Router.current().route.getName() is 'src'
       Router.go 'doc', _id: @_id
     else Router.go 'src', _id: @_id
 
