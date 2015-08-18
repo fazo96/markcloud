@@ -28,3 +28,11 @@ Accounts.emailTemplates.verifyEmail.text = (user,url) ->
   url = Meteor.absoluteUrl 'verify/'+token
   '''Welcome to MarkCloud! To activate your account, click on the \
   following link: '''+url
+
+# Twitter configuration code
+Meteor.startup ->
+  Accounts.loginServiceConfiguration.remove service : 'twitter'
+  if Meteor.settings.twitter? then Accounts.loginServiceConfiguration.insert
+    service: 'twitter'
+    consumerKey: Meteor.settings.twitter.apiKey
+    secret: Meteor.settings.twitter.secret

@@ -20,16 +20,18 @@ since the apps now depends on Meteor's
 
 #### Twitter Authentication
 
-Create this file: `server/settings.coffee` with this content:
+Create a `json` file with this content:
 
-```coffeescript
-Meteor.startup ->
-  Accounts.loginServiceConfiguration.remove service : 'twitter'
-  Accounts.loginServiceConfiguration.insert
-    service: 'twitter'
-    consumerKey: 'Your API key'
-    secret: 'Your API secret'
+```json
+{
+  "twitter" : {
+    "apiKey": "your_twitter_api_key",
+    "secret": "your_twitter_api_secret"
+  }
+}
 ```
+
+Now run or deploy the application with the `--settings yourfile.json` parameter.
 
 Your users will now be able to login using twitter. You may want to disable the
 button if you don't configure twitter authentication.
